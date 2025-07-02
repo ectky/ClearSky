@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+</head>
+<body>
+    <h2>Grades for {{ course_name }}</h2>
+    <p><strong>Grade Number:</strong> {{ grade_number }}</p>
+    <p><strong>Examine Period:</strong> {{ examine_period }}</p>
+    <p><strong>Message:</strong> {{ message }}</p>
+    <h3>{{ title }}</h3>
+    <h4>Statistics</h4>
+    <ul>
+        <li>Mean: {{ stats.mean }}</li>
+        <li>Median: {{ stats.median }}</li>
+        <li>Std: {{ stats.std }}</li>
+    </ul>
+    <img src="data:image/png;base64,{{ plot_png }}" alt="Histogram">
+    <h3>Parsed Grades</h3>
+    <div style="overflow-x: auto; max-height: 400px;">
+        <table border="1">
+            <tr>
+                {% for key in grades[0].keys() %}
+                <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in grades %}
+            <tr>
+                {% for value in row.values() %}
+                <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

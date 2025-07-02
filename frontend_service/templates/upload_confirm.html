@@ -1,0 +1,24 @@
+<h2>Potwierdź dane przed zapisaniem</h2>
+<form method="post" action="{{ url_for('confirm_upload') }}">
+    <!-- Show selected metadata as readonly fields -->
+    <label>Nazwa kursu:</label>
+    <input type="text" value="{{ data.course_name }}" readonly><br>
+
+    <label>Okres egzaminacyjny:</label>
+    <input type="text" value="{{ data.examine_period }}" readonly><br>
+
+    <label>Liczba ocen:</label>
+    <input type="text" value="{{ data.grade_number }}" readonly><br>
+
+    <label>Wiadomość:</label>
+    <textarea name="message"></textarea>
+
+    <!-- Full parsed data as hidden field -->
+    <input type="hidden" name="parsed_data" value='{{ data | tojson | safe }}'>
+
+    <button type="submit">Zapisz</button>
+</form>
+
+<form method="get" action="{{ url_for('upload') }}" style="display:inline;">
+    <button type="submit">Wróć</button>
+</form>

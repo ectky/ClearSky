@@ -1,0 +1,14 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY . /app
+
+RUN pip install flask pandas
+
+# Ensure the DB file is writable inside container
+RUN chmod 666 grades.db
+
+EXPOSE 5002
+
+CMD ["python", "app.py"]

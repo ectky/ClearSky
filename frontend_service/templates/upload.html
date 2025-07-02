@@ -1,0 +1,9 @@
+<form method="post" enctype="multipart/form-data">
+    <label for="file">Wybierz plik Excel:</label>
+    <input type="file" name="file" required>
+    <button type="submit">Prześlij</button>
+</form>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
