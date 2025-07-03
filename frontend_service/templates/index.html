@@ -4,7 +4,10 @@
     <div class="mb-4">
       <a href="{{ url_for('upload') }}" class="btn btn-primary">➕ Dodaj oceny</a>
     </div>
-  
+    <a href="{{ url_for('choose_course') }}">
+      <button>Przejdź do statystyk kursów</button>
+    </a>
+
     <h4>Dostępne zestawy ocen:</h4>
     {% if available_tables %}
       <ul class="list-group">

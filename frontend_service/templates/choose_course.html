@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Choose course</title>
+</head>
+<body>
+    <h1>Course stats</h1>
+
+    <form method="POST" action="{{ url_for('stats_redirect') }}">
+        <label for="course_id">Choose course ID:</label>
+        <select name="course_id" id="course_id" required>
+            {% for cid in course_ids %}
+                <option value="{{ cid }}">{{ cid }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Show stats</button>
+    </form>
+    
+</body>
+</html>

@@ -35,6 +35,8 @@ def analyze():
                 "metadata": {
                     "message": data["metadata"].get("message", ""),
                     "grade_number": data["metadata"].get("num_grades", ""),
+                    "course_name": data["metadata"].get("course_name", ""),
+                    "examine_period": data["metadata"].get("examine_period", ""),
                 },
                 "plot_png": plot_png,
                 "table": df.to_html(index=False, classes="table table-bordered"),

@@ -80,57 +80,42 @@ def confirm_upload():
         return render_template("error.html", message="Nie udało się zapisać danych.")
 
 
+
 @app.route("/stats", methods=["GET", "POST"])
 def stats():
-    if request.method == "POST":
-        course_name = request.form.get("course_name")
-        examine_period = request.form.get("examine_period")
-    else:
-        course_name = request.args.get("course_name")
-        examine_period = request.args.get("examine_period")
+    allowed_course_ids = [1, 2, 3]
 
-    # If not provided, show a form with dropdowns
-    if not course_name or not examine_period:
-        # Fetch available course_name and examine_period pairs from grade_service
-        try:
-            resp = requests.get(f"{GRADE_SERVICE_URL}/available_tables")
-            if resp.status_code == 200:
-                available_tables = resp.json()
-            else:
-                available_tables = []
-        except Exception as e:
-            available_tables = []
-        # Extract unique course_name and examine_period pairs
-        course_periods = [(t["course_name"], t["examine_period"]) for t in available_tables]
-        return render_template("stats_select.html", course_periods=course_periods)
+    if request.method == "POST":
+        course_id = request.form.get("course_id", type=int)
+    else:
+        course_id = request.args.get("course_id", type=int)
+
+    if not course_id or course_id not in allowed_course_ids:
+        return render_template("error.html", message="Nieprawidłowy lub brakujący course_id (dozwolone: 1, 2, 3).")
 
     try:
         grades_resp = requests.get(
             f"{GRADE_SERVICE_URL}/grades",
-            params={"course_name": course_name, "examine_period": examine_period},
+            params={"course_id": course_id}
         )
         if grades_resp.status_code != 200:
             return render_template("error.html", message="Nie udało się pobrać ocen.")
-        grades_data = grades_resp.json()
 
-        print("GRADES DATA:", grades_data)
+        grades_data = grades_resp.json()
 
         analyze_resp = requests.post(
             f"{EXCEL_SERVICE_URL}/analyze", json={"data": grades_data}
         )
         if analyze_resp.status_code != 200:
-            return render_template(
-                "error.html",
-                message="Nie udało się wygenerować statystyk.",
-                test=analyze_resp.json(),
-            )
+            return render_template("error.html", message="Nie udało się wygenerować statystyk.")
 
         stats_data = analyze_resp.json()
 
         return render_template(
             "stats.html",
-            course_name=course_name,
-            examine_period=examine_period,
+            course_name=stats_data["metadata"].get("course_name", ""),
+            examine_period=stats_data["metadata"].get("examine_period", ""),
+            course_id=course_id,
             title=stats_data["title"],
             stats=stats_data["stats"],
             plot_png=stats_data["plot_png"],
@@ -141,6 +126,7 @@ def stats():
 
     except Exception as e:
         return render_template("error.html", message=f"Błąd: {e}")
+
 
 
 @app.route("/course/<int:course_id>")
@@ -171,6 +157,24 @@ def course_detail(course_id):
 
     return render_template("course_detail.html", course=course, grades=grades, metadata=metadata)
 
+@app.route("/choose_course")
+def choose_course():
+    try:
+        resp = requests.get(GRADE_SERVICE_URL + "/course_ids")
+        if resp.status_code == 200:
+            course_ids = resp.json()
+        else:
+            course_ids = []
+    except Exception:
+        course_ids = []
+
+    return render_template("choose_course.html", course_ids=course_ids)
+
+
+@app.route("/stats_redirect", methods=["POST"])
+def stats_redirect():
+    course_id = request.form.get("course_id")
+    return redirect(url_for("stats", course_id=course_id))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

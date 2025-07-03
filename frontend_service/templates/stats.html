@@ -11,22 +11,21 @@
 </head>
 <body>
     <h2>{{ title }}</h2>
-    <p><strong>Kurs:</strong> {{ course_name }}</p>
-    <p><strong>Liczba ocen:</strong> {{ grade_number }}</p>
-    <p><strong>Okres egzaminacyjny:</strong> {{ examine_period }}</p>
-    <p><strong>Wiadomość:</strong> {{ message }}</p>
+    <p><strong>Course:</strong> {{ course_name }}</p>
+    <p><strong>Examine period:</strong> {{ examine_period }}</p>
+    <p><strong>Message:</strong> {{ message }}</p>
 
-    <h3>Wykres:</h3>
+    <h3>Chart:</h3>
     <img src="data:image/png;base64,{{ plot_png }}" alt="Grade Distribution">
 
-    <h3>Statystyki:</h3>
+    <h3>Statistics:</h3>
     <ul>
         {% for key, value in stats.items() %}
         <li><strong>{{ key }}:</strong> {{ value }}</li>
         {% endfor %}
     </ul>
 
-    <h3>Oceny:</h3>
+    <h3>Grades:</h3>
     <div class="scrollable-table">
         {{ table|safe }}
     </div>
