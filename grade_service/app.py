@@ -83,7 +83,7 @@ def get_grades():
         )
         # grades_df = pd.read_sql_query(f'SELECT * FROM "{grades_table}"', conn)
         meta_df = pd.read_sql_query(f'SELECT * FROM "{meta_table}"', conn)
-        metadata = meta_df.to_dict(orient="records")[0]
+        metadata = meta_df.to_dict(orient="records")[-1]
 
         conn.close()
 

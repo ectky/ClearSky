@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import requests
-
+import re
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # For session handling
 
@@ -83,15 +83,13 @@ def confirm_upload():
 
 @app.route("/stats", methods=["GET", "POST"])
 def stats():
-    allowed_course_ids = [1, 2, 3]
+  
 
     if request.method == "POST":
         course_id = request.form.get("course_id", type=int)
     else:
         course_id = request.args.get("course_id", type=int)
 
-    if not course_id or course_id not in allowed_course_ids:
-        return render_template("error.html", message="Nieprawidłowy lub brakujący course_id (dozwolone: 1, 2, 3).")
 
     try:
         grades_resp = requests.get(
@@ -159,15 +157,72 @@ def course_detail(course_id):
 
 @app.route("/choose_course")
 def choose_course():
-    
-    return render_template("choose_course.html")
+    static_courses = [
+        {"id": 1, "name": "Kurs 1"},
+        {"id": 2, "name": "Kurs 2"},
+        {"id": 3, "name": "Kurs 3"},
+    ]
+    try:
+        response = requests.get(f"{COURSES_SERVICE_URL}/courses", timeout=5)
+        dynamic_courses = response.json() if response.status_code == 200 else []
+    except Exception as e:
+        print("Błąd pobierania kursów:", e)
+        dynamic_courses = []
+
+    all_courses = static_courses + dynamic_courses
+    return render_template("choose_course.html", courses=all_courses)
+
+
+
+
 
 
 
 @app.route("/stats_redirect", methods=["POST"])
 def stats_redirect():
-    course_id = request.form.get("course_id")
-    return redirect(url_for("stats", course_id=course_id))
+    raw_value = request.form.get("course_id", "")
+    match = re.match(r"(\d+)", raw_value)
+    if match:
+        course_id = int(match.group(1))
+        return redirect(url_for("stats", course_id=course_id))
+    else:
+        return render_template("error.html", message="Nieprawidłowy format kursu.")
+
+
+
+COURSES_FILE = "courses.json"  # plik lokalny do przechowywania dodanych kursów
+
+def load_courses():
+    if os.path.exists(COURSES_FILE):
+        with open(COURSES_FILE, "r") as f:
+            return json.load(f)
+    return []
+
+
+
+def save_course(course_id, course_name):
+    try:
+        requests.post(
+            f"{COURSES_SERVICE_URL}/courses",
+            json={"id": int(course_id), "name": course_name},
+            timeout=5
+        )
+    except Exception as e:
+        print("Błąd zapisu kursu:", e)
+
+
+
+@app.route("/add_course", methods=["GET", "POST"])
+def add_course():
+    if request.method == "POST":
+        course_id = request.form.get("course_id")
+        course_name = request.form.get("course_name")
+        if course_id and course_name:
+            save_course(course_id, course_name)
+            return redirect(url_for("choose_course"))
+        else:
+            return render_template("error.html", message="Brakuje ID lub nazwy kursu.")
+    return render_template("add_course.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

@@ -8,18 +8,5 @@
       <button>Przejdź do statystyk kursów</button>
     </a>
 
-    <h4>Dostępne zestawy ocen:</h4>
-    {% if available_tables %}
-      <ul class="list-group">
-        {% for table in available_tables %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ table.course_name }} — {{ table.examine_period }}</span>
-            <a href="{{ url_for('stats') }}?course_name={{ table.course_name }}&examine_period={{ table.examine_period }}" class="btn btn-sm btn-outline-info">📊 Statystyki</a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>Brak dostępnych danych ocen.</p>
-    {% endif %}
   </div>
   
