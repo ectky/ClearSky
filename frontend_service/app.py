@@ -6,9 +6,9 @@ app.secret_key = "supersecretkey"  # For session handling
 
 import os
 
-EXCEL_SERVICE_URL = os.environ.get("EXCEL_PARSER_URL")
-GRADE_SERVICE_URL = os.environ.get("GRADE_SERVICE_URL")
-
+EXCEL_SERVICE_URL = os.environ.get("EXCEL_PARSER_URL", "http://localhost:5001")
+GRADE_SERVICE_URL = os.environ.get("GRADE_SERVICE_URL", "http://localhost:5002")
+COURSES_SERVICE_URL = os.environ.get("COURSES_SERVICE_URL", "http://localhost:5004")
 
 @app.route("/")
 def index():
@@ -29,6 +29,7 @@ def index():
 def upload():
     if request.method == "POST":
         file = request.files["file"]
+        course_id = request.form.get("course_id")
         if not file:
             return "No file uploaded", 400
 
@@ -37,12 +38,23 @@ def upload():
 
         if response.status_code == 200:
             parsed_data = response.json()
+            parsed_data["course_id"] = course_id
             return render_template("upload_confirm.html", data=parsed_data)
         else:
             error_message = response.text
             return render_template("upload.html", error=error_message)
+    else:
+        try:
+            response = requests.get(
+                f"{COURSES_SERVICE_URL}/courses",
+                # params={"user_id": user_id, "is_superuser": int(is_superuser)}
+            )
+            courses = response.json() if response.status_code == 200 else []
+        except Exception as e:
+            print("Error contacting courses service:", e)
+            courses = []
 
-    return render_template("upload.html")
+        return render_template("upload.html", courses=courses)
 
 
 @app.route("/confirm_upload", methods=["POST"])
@@ -114,3 +126,4 @@ def stats():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
+

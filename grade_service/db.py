@@ -8,14 +8,17 @@ def create_table_if_not_exists(conn, table_name, columns):
     conn.commit()
 
 
-def insert_grades(conn, table_name, grades):
+def insert_grades(conn, table_name, grades, course_id):
     if not grades:
         return
 
-    columns = grades[0].keys()
+    columns = list(grades[0].keys()) + ["course_id"]
     placeholders = ", ".join(["?"] * len(columns))
     col_names = ", ".join([f'"{col}"' for col in columns])
-    values = [tuple(str(row[col]) for col in columns) for row in grades]
+    values = [
+        tuple(str(row[col]) if col != "course_id" else course_id for col in columns)
+        for row in grades
+    ]
 
     query = f'INSERT INTO "{table_name}" ({col_names}) VALUES ({placeholders})'
     conn.executemany(query, values)
