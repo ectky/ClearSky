@@ -8,14 +8,16 @@
     <h1>Course stats</h1>
 
     <form method="POST" action="{{ url_for('stats_redirect') }}">
-        <label for="course_id">Choose course ID:</label>
+        <label for="course_id">Choose course:</label>
         <select name="course_id" id="course_id" required>
-            {% for cid in course_ids %}
-                <option value="{{ cid }}">{{ cid }}</option>
-            {% endfor %}
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
         </select>
-        <button type="submit">Show stats</button>
+    
+        <button type="submit">Show statistics</button>
     </form>
+    
     
 </body>
 </html>

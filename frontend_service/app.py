@@ -159,16 +159,9 @@ def course_detail(course_id):
 
 @app.route("/choose_course")
 def choose_course():
-    try:
-        resp = requests.get(GRADE_SERVICE_URL + "/course_ids")
-        if resp.status_code == 200:
-            course_ids = resp.json()
-        else:
-            course_ids = []
-    except Exception:
-        course_ids = []
+    
+    return render_template("choose_course.html")
 
-    return render_template("choose_course.html", course_ids=course_ids)
 
 
 @app.route("/stats_redirect", methods=["POST"])
