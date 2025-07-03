@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+# from flask import Flask, request, jsonify
 import sqlite3
 import re
 import pandas as pd
@@ -15,7 +15,7 @@ conn.execute(
 
 conn.close()
 
-conn = sqlite3.connect("courses.db")
+conn = sqlite3.connect("courses_service/courses.db")
 
 conn.execute(
     """CREATE TABLE IF NOT EXISTS courses (
@@ -54,7 +54,7 @@ cursor.executemany(
 
 conn.commit()
 conn.close()
-conn = sqlite3.connect("courses.db")
+conn = sqlite3.connect("/courses_service/courses.db")
 cursor = conn.cursor()
 cursor.executemany("INSERT INTO courses (name, owner_id) VALUES (?, ?)", courses)
 conn.commit()

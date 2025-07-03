@@ -6,6 +6,6 @@ COPY . /app
 
 RUN pip install flask pandas
 
-EXPOSE 5003
+EXPOSE 5004
 
 CMD ["python", "app.py"]

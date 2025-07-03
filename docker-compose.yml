@@ -12,6 +12,7 @@ services:
       - EXCEL_PARSER_URL=http://excel_parser:5002
       - GRADE_SERVICE_URL=http://grades_service:5003
       - USER_MANAGEMENT_SERVICE_BASE_URL=http://user_management:3000
+      - COURSES_SERVICE_URL=http://courses_service:5004
 
   excel_parser:
     build: ./excel_parser_service
@@ -25,6 +26,12 @@ services:
     volumes:
       - grades_data:/grades.db
 
+  courses_service:
+    build: ./courses_service
+    ports:
+      - "5004:5004"
+    volumes:
+      - courses_data:/courses.db
   user_management:
     build: ./UserManagement
     ports:
@@ -53,3 +60,4 @@ services:
 volumes:
   grades_data:
   user_management_db_data:
+  courses_data:

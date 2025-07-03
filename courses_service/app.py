@@ -10,7 +10,7 @@ def get_courses():
     # is_superuser = request.args.get("is_superuser", type=int)
 
     try:
-        conn = sqlite3.connect("courses.db")
+        conn = sqlite3.connect("./courses.db")
         cursor = conn.cursor()
 
         # if is_superuser:

@@ -1,122 +1,116 @@
-from flask import Flask, request, jsonify
-from db import create_table_if_not_exists, insert_grades
-import sqlite3
-import re
-import pandas as pd
+from flask import Flask, render_template, request, redirect, url_for, session
+import requests
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"  # For session handling
+
+import os
+
+EXCEL_PARSER_URL = os.environ.get("EXCEL_PARSER_URL")
+GRADE_SERVICE_URL = os.environ.get("GRADE_SERVICE_URL")
 
 
-@app.route("/save", methods=["POST"])
-def save_grades():
-    print("AAAAAA")
-    data = request.get_json()
-    grades = data.get("grades")
-    message = data.get("message")
-    course_name = data.get("course_name")
-    examine_period = data.get("examine_period")
-    table_base = f"{course_name}_{examine_period}".replace(" ", "_").lower()
-    grades_table = f"grades"
-    meta_table = f"meta"
+@app.route("/")
+def index():
+    try:
+        print("HERE")
+        resp = requests.get(f"{GRADE_SERVICE_URL}/available_tables")
+        if resp.status_code == 200:
+            available_tables = resp.json()
+        else:
+            available_tables = []
+    except Exception as e:
+        available_tables = []
 
-    if not grades:
-        return jsonify({"error": "Missing table_name or grades"}), 400
+    return render_template("index.html", available_tables=available_tables)
+
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    if request.method == "POST":
+        file = request.files["file"]
+        if not file:
+            return "No file uploaded", 400
+
+        files = {"file": (file.filename, file.stream, file.content_type)}
+        response = requests.post(EXCEL_SERVICE_URL + "/parse", files=files)
+
+        if response.status_code == 200:
+            parsed_data = response.json()
+            return render_template("upload_confirm.html", data=parsed_data)
+        else:
+            error_message = response.text
+            return render_template("upload.html", error=error_message)
+
+    return render_template("upload.html")
+
+
+@app.route("/confirm_upload", methods=["POST"])
+def confirm_upload():
+    import json
+
+    parsed_json_str = request.form.get("parsed_data")
+    if not parsed_json_str:
+        return render_template("error.html", message="Brak danych do zapisania.")
 
     try:
-        conn = sqlite3.connect("grades.db")
-        create_table_if_not_exists(
-            conn, grades_table, list(grades[0].keys()) + ["course_id"]
-        )
-        insert_grades(conn, grades_table, grades, data["course_id"])
-
-        # 2. Create and insert into metadata table
-        conn.execute(
-            f"""
-            CREATE TABLE IF NOT EXISTS "{meta_table}" (
-                "course_id" INTEGER,
-                "course_name" TEXT,
-                "examine_period" TEXT,
-                "num_grades" INTEGER,
-                "message" TEXT
-            )
-        """
-        )
-        conn.execute(
-            f"""
-            DELETE FROM "{meta_table}"
-        """
-        )  # ensure no duplicates
-        conn.execute(
-            f"""
-            INSERT INTO "{meta_table}" ("course_id", "course_name", "examine_period", "num_grades", "message")
-            VALUES (?, ?, ?, ?, ?)
-        """,
-            (data["course_id"], course_name, examine_period, len(grades), message),
-        )
-
-        conn.commit()
-        conn.close()
+        parsed_data = json.loads(parsed_json_str)
     except Exception as e:
-        print(e)
-        return jsonify({"error": str(e)}), 500
+        return render_template("error.html", message=f"Błąd parsowania danych: {e}")
+    message = request.form.get("message", "")
+    parsed_data["message"] = message
+    response = requests.post(GRADE_SERVICE_URL + "/save", json=parsed_data)
 
-    return jsonify({"status": "success"}), 200
+    if response.status_code == 200:
+        return redirect(url_for("index"))
+    else:
+        return render_template("error.html", message="Nie udało się zapisać danych.")
 
 
-def sanitize_name(name: str) -> str:
-    return re.sub(r"\W+", "_", name.strip().lower())
-
-
-@app.route("/grades", methods=["GET"])
-def get_grades():
-    course_id = request.args.get("course_id")
+@app.route("/stats")
+def stats():
     course_name = request.args.get("course_name")
     examine_period = request.args.get("examine_period")
 
     if not course_name or not examine_period:
-        return jsonify({"error": "Missing parameters"}), 400
-
-    table_base = f"{course_name}_{examine_period}".replace(" ", "_").lower()
-    grades_table = f"grades_{table_base}"
-    meta_table = f"meta_{table_base}"
+        return render_template("error.html", message="Brak wymaganych parametrów.")
 
     try:
-        conn = sqlite3.connect("grades.db")
-        grades_df = pd.read_sql_query(
-            f"SELECT * FROM grades WHERE course_id = ?", conn, params=(course_id,)
+        grades_resp = requests.get(
+            f"{GRADE_SERVICE_URL}/grades",
+            params={"course_name": course_name, "examine_period": examine_period},
         )
-        # grades_df = pd.read_sql_query(f'SELECT * FROM "{grades_table}"', conn)
-        meta_df = pd.read_sql_query(f'SELECT * FROM "{meta_table}"', conn)
-        metadata = meta_df.to_dict(orient="records")[0]
+        if grades_resp.status_code != 200:
+            return render_template("error.html", message="Nie udało się pobrać ocen.")
+        grades_data = grades_resp.json()
 
-        conn.close()
-
-        return jsonify(
-            {"metadata": metadata, "grades": grades_df.to_dict(orient="records")}
+        analyze_resp = requests.post(
+            f"{EXCEL_SERVICE_URL}/analyze", json={"data": grades_data}
         )
+        if analyze_resp.status_code != 200:
+            return render_template(
+                "error.html",
+                message="Nie udało się wygenerować statystyk.",
+                test=analyze_resp.json(),
+            )
+
+        stats_data = analyze_resp.json()
+
+        return render_template(
+            "stats.html",
+            course_name=course_name,
+            examine_period=examine_period,
+            title=stats_data["title"],
+            stats=stats_data["stats"],
+            plot_png=stats_data["plot_png"],
+            table=stats_data["table"],
+            message=stats_data["metadata"].get("message", ""),
+            grade_number=stats_data["metadata"].get("grade_number", ""),
+        )
+
     except Exception as e:
-        print(e)
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/available_tables", methods=["GET"])
-def available_tables():
-    conn = sqlite3.connect("grades.db")
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    table_names = [row[0] for row in cursor.fetchall()]
-    print(table_names)
-    conn.close()
-    parsed = []
-    for name in table_names:
-        if name.startswith("grades"):
-            parts = name.split("_", 2)
-            if len(parts) == 3:
-                parsed.append({"course_name": parts[1], "examine_period": parts[2]})
-
-    return jsonify(parsed)
+        return render_template("error.html", message=f"Błąd: {e}")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5003, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -50,6 +50,7 @@ def upload():
                 # params={"user_id": user_id, "is_superuser": int(is_superuser)}
             )
             courses = response.json() if response.status_code == 200 else []
+            print(response.json())
         except Exception as e:
             print("Error contacting courses service:", e)
             courses = []
@@ -79,13 +80,29 @@ def confirm_upload():
         return render_template("error.html", message="Nie udało się zapisać danych.")
 
 
-@app.route("/stats")
+@app.route("/stats", methods=["GET", "POST"])
 def stats():
-    course_name = request.args.get("course_name")
-    examine_period = request.args.get("examine_period")
+    if request.method == "POST":
+        course_name = request.form.get("course_name")
+        examine_period = request.form.get("examine_period")
+    else:
+        course_name = request.args.get("course_name")
+        examine_period = request.args.get("examine_period")
 
+    # If not provided, show a form with dropdowns
     if not course_name or not examine_period:
-        return render_template("error.html", message="Brak wymaganych parametrów.")
+        # Fetch available course_name and examine_period pairs from grade_service
+        try:
+            resp = requests.get(f"{GRADE_SERVICE_URL}/available_tables")
+            if resp.status_code == 200:
+                available_tables = resp.json()
+            else:
+                available_tables = []
+        except Exception as e:
+            available_tables = []
+        # Extract unique course_name and examine_period pairs
+        course_periods = [(t["course_name"], t["examine_period"]) for t in available_tables]
+        return render_template("stats_select.html", course_periods=course_periods)
 
     try:
         grades_resp = requests.get(
@@ -95,6 +112,8 @@ def stats():
         if grades_resp.status_code != 200:
             return render_template("error.html", message="Nie udało się pobrać ocen.")
         grades_data = grades_resp.json()
+
+        print("GRADES DATA:", grades_data)
 
         analyze_resp = requests.post(
             f"{EXCEL_SERVICE_URL}/analyze", json={"data": grades_data}
@@ -122,6 +141,35 @@ def stats():
 
     except Exception as e:
         return render_template("error.html", message=f"Błąd: {e}")
+
+
+@app.route("/course/<int:course_id>")
+def course_detail(course_id):
+
+    try:
+        course_resp = requests.get(f"{COURSES_SERVICE_URL}/courses")
+        courses = course_resp.json() if course_resp.status_code == 200 else []
+        course = next((c for c in courses if c["id"] == course_id), None)
+        if not course:
+            return render_template("error.html", message="Nie znaleziono kursu.")
+    except Exception as e:
+        return render_template("error.html", message=f"Błąd pobierania kursu: {e}")
+
+
+    try:
+        grades_resp = requests.get(f"{GRADE_SERVICE_URL}/grades", params={"course_id": course_id, "course_name": course["name"], "examine_period": ""})
+        if grades_resp.status_code != 200:
+            grades = []
+            metadata = {}
+        else:
+            data = grades_resp.json()
+            grades = data.get("grades", [])
+            metadata = data.get("metadata", {})
+    except Exception as e:
+        grades = []
+        metadata = {}
+
+    return render_template("course_detail.html", course=course, grades=grades, metadata=metadata)
 
 
 if __name__ == "__main__":
