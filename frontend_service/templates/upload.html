@@ -1,4 +1,16 @@
+<!-- <form method="post" enctype="multipart/form-data">
+    <label for="file">Wybierz plik Excel:</label>
+    <input type="file" name="file" required>
+    <button type="submit">Prześlij</button>
+</form> -->
 <form method="post" enctype="multipart/form-data">
+    <label for="course">Wybierz kurs:</label>
+    <select name="course_id">
+        {% for course in courses %}
+            <option value="{{ course.id }}">{{ course.name }}</option>
+        {% endfor %}
+    </select>
+
     <label for="file">Wybierz plik Excel:</label>
     <input type="file" name="file" required>
     <button type="submit">Prześlij</button>

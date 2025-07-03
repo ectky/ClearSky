@@ -16,21 +16,24 @@ def save_grades():
     course_name = data.get("course_name")
     examine_period = data.get("examine_period")
     table_base = f"{course_name}_{examine_period}".replace(" ", "_").lower()
-    grades_table = f"grades_{table_base}"
-    meta_table = f"meta_{table_base}"
+    grades_table = f"grades"
+    meta_table = f"meta"
 
     if not grades:
         return jsonify({"error": "Missing table_name or grades"}), 400
 
     try:
         conn = sqlite3.connect("grades.db")
-        create_table_if_not_exists(conn, grades_table, grades[0].keys())
-        insert_grades(conn, grades_table, grades)
+        create_table_if_not_exists(
+            conn, grades_table, list(grades[0].keys()) + ["course_id"]
+        )
+        insert_grades(conn, grades_table, grades, data["course_id"])
 
         # 2. Create and insert into metadata table
         conn.execute(
             f"""
             CREATE TABLE IF NOT EXISTS "{meta_table}" (
+                "course_id" INTEGER,
                 "course_name" TEXT,
                 "examine_period" TEXT,
                 "num_grades" INTEGER,
@@ -45,15 +48,16 @@ def save_grades():
         )  # ensure no duplicates
         conn.execute(
             f"""
-            INSERT INTO "{meta_table}" ("course_name", "examine_period", "num_grades", "message")
-            VALUES (?, ?, ?, ?)
+            INSERT INTO "{meta_table}" ("course_id", "course_name", "examine_period", "num_grades", "message")
+            VALUES (?, ?, ?, ?, ?)
         """,
-            (course_name, examine_period, len(grades), message),
+            (data["course_id"], course_name, examine_period, len(grades), message),
         )
 
         conn.commit()
         conn.close()
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
 
     return jsonify({"status": "success"}), 200
@@ -65,6 +69,7 @@ def sanitize_name(name: str) -> str:
 
 @app.route("/grades", methods=["GET"])
 def get_grades():
+    course_id = request.args.get("course_id")
     course_name = request.args.get("course_name")
     examine_period = request.args.get("examine_period")
 
@@ -77,7 +82,10 @@ def get_grades():
 
     try:
         conn = sqlite3.connect("grades.db")
-        grades_df = pd.read_sql_query(f'SELECT * FROM "{grades_table}"', conn)
+        grades_df = pd.read_sql_query(
+            f"SELECT * FROM grades WHERE course_id = ?", conn, params=(course_id,)
+        )
+        # grades_df = pd.read_sql_query(f'SELECT * FROM "{grades_table}"', conn)
         meta_df = pd.read_sql_query(f'SELECT * FROM "{meta_table}"', conn)
         metadata = meta_df.to_dict(orient="records")[0]
 
@@ -98,10 +106,11 @@ def available_tables():
 
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     table_names = [row[0] for row in cursor.fetchall()]
+    print(table_names)
     conn.close()
     parsed = []
     for name in table_names:
-        if name.startswith("grades_"):
+        if name.startswith("grades"):
             parts = name.split("_", 2)
             if len(parts) == 3:
                 parsed.append({"course_name": parts[1], "examine_period": parts[2]})
