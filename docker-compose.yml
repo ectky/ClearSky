@@ -4,25 +4,52 @@ services:
   frontend:
     build: ./frontend_service
     ports:
-      - "5000:5000"
+      - "5001:5001"
     depends_on:
       - excel_parser
       - grades_service
     environment:
-      - EXCEL_PARSER_URL=http://excel_parser:5001
-      - GRADE_SERVICE_URL=http://grades_service:5002
+      - EXCEL_PARSER_URL=http://excel_parser:5002
+      - GRADE_SERVICE_URL=http://grades_service:5003
+      - USER_MANAGEMENT_SERVICE_BASE_URL=http://user_management:3000
 
   excel_parser:
     build: ./excel_parser_service
     ports:
-      - "5001:5001"
+      - "5002:5002"
 
   grades_service:
-    build: ./grades_service
+    build: ./grade_service
     ports:
-      - "5002:5002"
+      - "5003:5003"
     volumes:
-      - grades_data:/app/grades.db
+      - grades_data:/grades.db
+
+  user_management:
+    build: ./UserManagement
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=user_management_db
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=usermanagement
+    depends_on:
+      - user_management_db
+
+  user_management_db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: usermanagement
+    ports:
+      - "5432:5432"
+    volumes:
+      - user_management_db_data:/var/lib/postgresql/data
 
 volumes:
   grades_data:
+  user_management_db_data:
