@@ -10,7 +10,6 @@ EXCEL_SERVICE_URL = os.environ.get("EXCEL_PARSER_URL", "http://localhost:5001")
 GRADE_SERVICE_URL = os.environ.get("GRADE_SERVICE_URL", "http://localhost:5002")
 COURSES_SERVICE_URL = os.environ.get("COURSES_SERVICE_URL", "http://localhost:5004")
 
-
 @app.route("/")
 def index():
     try:
@@ -126,4 +125,5 @@ def stats():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5003, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
+

@@ -9,6 +9,6 @@ RUN pip install flask pandas
 # Ensure the DB file is writable inside container
 RUN chmod 666 grades.db
 
-EXPOSE 5002
+EXPOSE 5003
 
 CMD ["python", "app.py"]
