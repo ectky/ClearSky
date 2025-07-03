@@ -1,12 +1,89 @@
-<div class="container mt-5">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grading System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5a6268;
+    }
+
+    a button {
+      all: unset;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
     <h2>Grading System</h2>
   
     <div class="mb-4">
-      <a href="{{ url_for('upload') }}" class="btn btn-primary">➕ Dodaj oceny</a>
+      <a href="{{ url_for('upload') }}" class="btn">➕ Add Grades</a>
     </div>
-    <a href="{{ url_for('choose_course') }}">
-      <button>Przejdź do statystyk kursów</button>
-    </a>
 
+    <a href="{{ url_for('choose_course') }}">
+      <button>Go to Course Statistics</button>
+    </a>
   </div>
-  
+
+</body>
+</html>

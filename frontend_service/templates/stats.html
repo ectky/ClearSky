@@ -1,18 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Statystyki</title>
+    <meta charset="UTF-8">
+    <title>Statistics</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            padding: 2rem;
+            margin: 0;
+            color: #333;
+        }
+
+        h2, h3 {
+            margin-top: 2rem;
+            color: #2c3e50;
+        }
+
+        p {
+            font-size: 16px;
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #555;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background: #fff;
+            margin: 0.5rem 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        img {
+            margin-top: 1rem;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
         .scrollable-table {
             overflow-x: auto;
             max-width: 100%;
+            margin-top: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f5;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
+
     <h2>{{ title }}</h2>
+
     <p><strong>Course:</strong> {{ course_name }}</p>
-    <p><strong>Examine period:</strong> {{ examine_period }}</p>
+    <p><strong>Examination Period:</strong> {{ examine_period }}</p>
     <p><strong>Message:</strong> {{ message }}</p>
 
     <h3>Chart:</h3>
@@ -29,5 +101,6 @@
     <div class="scrollable-table">
         {{ table|safe }}
     </div>
+
 </body>
 </html>

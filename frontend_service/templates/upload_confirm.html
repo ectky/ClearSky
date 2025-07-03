@@ -1,24 +1,108 @@
-<h2>Potwierdź dane przed zapisaniem</h2>
-<form method="post" action="{{ url_for('confirm_upload') }}">
-    <!-- Show selected metadata as readonly fields -->
-    <label>Nazwa kursu:</label>
-    <input type="text" value="{{ data.course_name }}" readonly><br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Data</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
 
-    <label>Okres egzaminacyjny:</label>
-    <input type="text" value="{{ data.examine_period }}" readonly><br>
+        form {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
 
-    <label>Liczba ocen:</label>
-    <input type="text" value="{{ data.grade_number }}" readonly><br>
+        h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
 
-    <label>Wiadomość:</label>
-    <textarea name="message"></textarea>
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: 600;
+            color: #555;
+        }
 
-    <!-- Full parsed data as hidden field -->
-    <input type="hidden" name="parsed_data" value='{{ data | tojson | safe }}'>
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 0.3rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            resize: vertical;
+        }
 
-    <button type="submit">Zapisz</button>
-</form>
+        textarea {
+            min-height: 80px;
+        }
 
-<form method="get" action="{{ url_for('upload') }}" style="display:inline;">
-    <button type="submit">Wróć</button>
-</form>
+        button {
+            margin-top: 1.5rem;
+            padding: 12px;
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .secondary-button {
+            background-color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .secondary-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+    <form method="post" action="{{ url_for('confirm_upload') }}">
+        <h2>Confirm Data Before Saving</h2>
+
+        <label>Course Name:</label>
+        <input type="text" value="{{ data.course_name }}" readonly>
+
+        <label>Examination Period:</label>
+        <input type="text" value="{{ data.examine_period }}" readonly>
+
+        <label>Number of Grades:</label>
+        <input type="text" value="{{ data.grade_number }}" readonly>
+
+        <label>Message:</label>
+        <textarea name="message"></textarea>
+
+        <input type="hidden" name="parsed_data" value='{{ data | tojson | safe }}'>
+
+        <button type="submit">Save</button>
+    </form>
+
+    <form method="get" action="{{ url_for('upload') }}">
+        <button type="submit" class="secondary-button">Go Back</button>
+    </form>
+
+</body>
+</html>

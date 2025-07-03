@@ -1,21 +1,95 @@
-<!-- <form method="post" enctype="multipart/form-data">
-    <label for="file">Wybierz plik Excel:</label>
-    <input type="file" name="file" required>
-    <button type="submit">Prześlij</button>
-</form> -->
-<form method="post" enctype="multipart/form-data">
-    <label for="course">Wybierz kurs:</label>
-    <select name="course_id">
-        {% for course in courses %}
-            <option value="{{ course.id }}">{{ course.name }}</option>
-        {% endfor %}
-    </select>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Grades</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
 
-    <label for="file">Wybierz plik Excel:</label>
-    <input type="file" name="file" required>
-    <button type="submit">Prześlij</button>
-</form>
+        form {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 0.3rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            margin-top: 1.5rem;
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: red;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <form method="post" enctype="multipart/form-data">
+        <h2>Upload Excel File</h2>
+
+        <label for="course">Select Course:</label>
+        <select name="course_id" required>
+            {% for course in courses %}
+                <option value="{{ course.id }}">{{ course.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="file">Choose Excel File:</label>
+        <input type="file" name="file" accept=".xls,.xlsx" required>
+
+        <button type="submit">Upload</button>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+    </form>
+
+</body>
+</html>

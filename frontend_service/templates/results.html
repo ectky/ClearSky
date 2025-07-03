@@ -1,36 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Results</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        h2, h3, h4 {
+            color: #333;
+        }
+
+        p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        strong {
+            color: #333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            margin-top: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f0f0f5;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 400px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
     <h2>Grades for {{ course_name }}</h2>
+
     <p><strong>Grade Number:</strong> {{ grade_number }}</p>
-    <p><strong>Examine Period:</strong> {{ examine_period }}</p>
+    <p><strong>Examination Period:</strong> {{ examine_period }}</p>
     <p><strong>Message:</strong> {{ message }}</p>
+
     <h3>{{ title }}</h3>
+
     <h4>Statistics</h4>
     <ul>
-        <li>Mean: {{ stats.mean }}</li>
-        <li>Median: {{ stats.median }}</li>
-        <li>Std: {{ stats.std }}</li>
+        <li><strong>Mean:</strong> {{ stats.mean }}</li>
+        <li><strong>Median:</strong> {{ stats.median }}</li>
+        <li><strong>Standard Deviation:</strong> {{ stats.std }}</li>
     </ul>
-    <img src="data:image/png;base64,{{ plot_png }}" alt="Histogram">
+
+    <img src="data:image/png;base64,{{ plot_png }}" alt="Grade Histogram">
+
     <h3>Parsed Grades</h3>
-    <div style="overflow-x: auto; max-height: 400px;">
-        <table border="1">
-            <tr>
-                {% for key in grades[0].keys() %}
-                <th>{{ key }}</th>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    {% for key in grades[0].keys() %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in grades %}
+                <tr>
+                    {% for value in row.values() %}
+                    <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% for row in grades %}
-            <tr>
-                {% for value in row.values() %}
-                <td>{{ value }}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
+            </tbody>
         </table>
     </div>
 </body>
