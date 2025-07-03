@@ -29,5 +29,5 @@ app.get('/', (req, res) => {
 // Use the user routes
 app.use(userRoutes);
 
-const port = 3000;
+const port = 3003;
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));

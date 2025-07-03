@@ -35,7 +35,7 @@ services:
   user_management:
     build: ./UserManagement
     ports:
-      - "3000:3000"
+      - "3003:3003"
     environment:
       - NODE_ENV=development
       - DB_HOST=user_management_db
@@ -45,7 +45,10 @@ services:
       - DB_NAME=usermanagement
     depends_on:
       - user_management_db
-
+  clear_sky:
+    build: ./clear-sky
+    ports:
+      - "3000:3000"
   user_management_db:
     image: postgres:15
     environment:
