@@ -7,11 +7,34 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
 
   // Handling form submission
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Log or process form submission here
     console.log(`Logging in with email: ${email} and password: ${password}`);
-    // Add your login logic or API call here
+  
+    try {
+      const response = await fetch('http://localhost:8001/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Authentication failed');
+      }
+  
+      const data = await response.json();
+      const token = data.token;
+  
+      console.log(`Received token: ${token}`);
+      // Store the token in localStorage
+      localStorage.setItem('token', token);
+  
+    } catch (error) {
+      console.error(`Error: ${error.message}`);
+      // Handle the error (e.g., show a message to the user)
+    }
   };
 
   return (

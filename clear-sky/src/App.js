@@ -5,7 +5,7 @@ import logo from './logo.svg';
 import './App.css';
 // Import the LoginPage component
 import LoginPage from './pages/LoginPage'; 
-import RegisterPage from './pages/RegisterPage'; 
+import CreateUserForm from './pages/CreateUserForm'; 
 // Create a theme instance and set the text primary color to white
 const theme = createTheme({
   palette: {
@@ -32,14 +32,14 @@ function App() {
           <nav>
             <Link to="/" className="App-link">Home</Link> |{" "}
             <Link to="/login" className="App-link">Login</Link> |{" "}
-            <Link to="/register" className="App-link">Register</Link>
+            <Link to="/create-user" className="App-link">Create User</Link>
           </nav>
 
           {/* Routes component looks through its children Routes and
               renders the first one that matches the current URL. */}
           <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/create-user" element={<CreateUserForm />} />
           <Route path="/" element={
           <div>
             <p>Edit <code>src/App.js</code> and save to reload.</p>

@@ -11,7 +11,7 @@ services:
     environment:
       - EXCEL_PARSER_URL=http://excel_parser:5002
       - GRADE_SERVICE_URL=http://grades_service:5003
-      - USER_MANAGEMENT_SERVICE_BASE_URL=http://user_management:3000
+      - USER_MANAGEMENT_SERVICE_BASE_URL=http://user_management:8002
       - COURSES_SERVICE_URL=http://courses_service:5004
 
   excel_parser:
@@ -35,7 +35,7 @@ services:
   user_management:
     build: ./UserManagement
     ports:
-      - "3003:3003"
+      - "8002:8002"
     environment:
       - NODE_ENV=development
       - DB_HOST=user_management_db
@@ -45,6 +45,12 @@ services:
       - DB_NAME=usermanagement
     depends_on:
       - user_management_db
+  authentication:
+    build: ./Authentication
+    ports:
+      - "8001:8001"
+    environment:
+      - NODE_ENV=development
   clear_sky:
     build: ./clear-sky
     ports:

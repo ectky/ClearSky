@@ -2,10 +2,11 @@ require('dotenv').config();
 const { Sequelize } = require('sequelize');
 const express = require('express');
 const userRoutes = require('./src/routes/userRoutes');  // Adjust the path as needed
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());  // For parsing application/json
-
+app.use(cors());
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
@@ -21,6 +22,14 @@ sequelize.authenticate()
   .then(() => console.log('Database connected!'))
   .catch(err => console.error('Unable to connect to the database:', err));
 
+sequelize.sync()
+  .then(result => {
+    console.log('Database synced!')
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
 // Add a root route for health check or friendly message
 app.get('/', (req, res) => {
   res.send('UserManagement service is running!');
@@ -29,5 +38,5 @@ app.get('/', (req, res) => {
 // Use the user routes
 app.use(userRoutes);
 
-const port = 3003;
+const port = 8002;
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
