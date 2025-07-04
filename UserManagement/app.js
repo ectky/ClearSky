@@ -3,6 +3,7 @@ const { Sequelize } = require('sequelize');
 const express = require('express');
 const userRoutes = require('./src/routes/userRoutes');  // Adjust the path as needed
 const cors = require('cors');
+const User = require('./src/models/user');
 
 const app = express();
 app.use(express.json());  // For parsing application/json
@@ -28,6 +29,14 @@ sequelize.sync()
   })
   .catch(err => {
     console.log(err);
+  });
+
+  User.sync({ force: false })  // 'force: true' will drop the table if it already exists
+  .then(() => {
+    console.log('User table has been successfully created');
+  })
+  .catch(error => {
+    console.error('This error occured', error);
   });
 
 // Add a root route for health check or friendly message
